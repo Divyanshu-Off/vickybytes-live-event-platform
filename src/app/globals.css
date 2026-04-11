@@ -1,73 +1,48 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0B1020;
-  --color-foreground: #F8FAFC;
-  --color-surface: #121A2B;
-  --color-surface-elevated: #18243A;
+  --font-display: var(--font-outfit), system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  
+  --color-background: #040813;
+  --color-surface: #0A0F1D;
+  --color-surface-elevated: #12182B;
+  
   --color-primary: #7C3AED;
-  --color-secondary: #06B6D4;
-  --color-text-primary: #F8FAFC;
+  --color-secondary: #EC4899;
+  --color-live: #EF4444;
+  
+  --color-text-primary: #FFFFFF;
   --color-text-secondary: #94A3B8;
-  --color-live: #F43F5E;
 
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-display: "Sora", system-ui, sans-serif;
+  --animate-shimmer: text-shimmer 8s linear infinite;
 
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
+  @keyframes text-shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
 }
 
 @layer base {
-  body {
-    @apply bg-background text-text-primary antialiased selection:bg-primary/30 selection:text-primary;
-    font-feature-settings: "cv02", "cv05", "cv11";
-  }
-
   * {
     @apply border-white/5;
   }
+
+  body {
+    @apply bg-background text-text-primary antialiased selection:bg-primary/30;
+  }
 }
 
-
 @layer utilities {
-  .glass {
-    @apply bg-white/5 backdrop-blur-md border border-white/10;
-  }
-  
-  .glass-dark {
-    @apply bg-black/20 backdrop-blur-xl border border-white/5;
-  }
-
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-br from-text-primary to-text-secondary;
-  }
-
-  .text-gradient-primary {
-    @apply bg-clip-text text-transparent bg-gradient-to-br from-primary to-secondary;
-  }
-
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
+    @apply bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer;
   }
 
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
-}
-

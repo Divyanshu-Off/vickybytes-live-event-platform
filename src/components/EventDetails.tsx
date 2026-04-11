@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { Heart, Share2, Info, Calendar, Clock, MapPin } from "lucide-react";
+import { Heart, Share2, Calendar, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import type { Event } from "@/data/mockEvents";
@@ -67,7 +67,7 @@ export function EventDetails({ event }: EventDetailsProps) {
               </div>
               <div className="flex flex-col">
                  <span className="text-[10px] uppercase font-bold text-text-secondary tracking-wider">Date</span>
-                 <span className="text-sm font-semibold">{new Date(event.scheduledAt).toLocaleDateString()}</span>
+                 <span className="text-sm font-semibold" suppressHydrationWarning>{new Date(event.scheduledAt).toLocaleDateString()}</span>
               </div>
            </div>
            <div className="flex items-center gap-3">
@@ -76,7 +76,7 @@ export function EventDetails({ event }: EventDetailsProps) {
               </div>
               <div className="flex flex-col">
                  <span className="text-[10px] uppercase font-bold text-text-secondary tracking-wider">Time</span>
-                 <span className="text-sm font-semibold">{new Date(event.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                 <span className="text-sm font-semibold" suppressHydrationWarning>{new Date(event.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
            </div>
            <div className="hidden lg:flex items-center gap-3">
@@ -122,7 +122,7 @@ export function EventDetails({ event }: EventDetailsProps) {
          ].map(stat => (
            <div key={stat.label} className="p-4 rounded-2xl bg-surface border border-white/5 flex flex-col gap-1">
               <span className="text-[10px] uppercase font-bold text-text-secondary tracking-widest">{stat.label}</span>
-              <span className={cn("text-xl font-display font-black", stat.color)}>{stat.val}</span>
+              <span className={cn("text-xl font-display font-black", stat.color)} suppressHydrationWarning>{stat.val}</span>
            </div>
          ))}
       </div>

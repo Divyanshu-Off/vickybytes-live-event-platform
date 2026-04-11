@@ -13,103 +13,111 @@ interface VideoPlayerProps {
 
 export function VideoPlayer({ thumbnail, isLive, viewerCount }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showControls, setShowControls] = useState(false);
+  const [volume] = useState(80);
 
   return (
-    <div 
-      className="relative aspect-video w-full bg-black rounded-[2rem] overflow-hidden group border border-white/5 shadow-2xl"
-      onMouseEnter={() => setShowControls(true)}
-      onMouseLeave={() => setShowControls(false)}
-    >
-      {/* Video Placeholder Content */}
+    <div className="relative w-full h-full bg-black group/player cursor-pointer overflow-hidden lg:rounded-b-[2.5rem]">
+      {/* Thumbnail / Video Placeholder */}
       <div 
         className={cn(
-          "absolute inset-0 bg-cover bg-center transition-transform duration-1000",
-          isPlaying ? "scale-105 opacity-40 blur-sm" : "scale-100 opacity-100"
+          "absolute inset-0 bg-cover bg-center transition-all duration-1000",
+          isPlaying ? "scale-105 opacity-40 blur-sm" : "scale-100 opacity-100 group-hover/player:scale-105"
         )}
         style={{ backgroundImage: `url(${thumbnail})` }}
       />
       
-      {!isPlaying && (
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          <button 
-            onClick={() => setIsPlaying(true)}
-            className="w-24 h-24 rounded-full bg-primary text-white flex items-center justify-center shadow-2xl shadow-primary/40 hover:scale-110 active:scale-95 transition-all duration-300"
-          >
-            <Play className="w-10 h-10 fill-current translate-x-1" />
-          </button>
-        </div>
-      )}
+      {/* Cinematic Overlays */}
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/80 to-transparent opacity-60 group-hover/player:opacity-100 transition-opacity" />
+      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover/player:opacity-100 transition-opacity" />
 
-      {/* Live Indicator Overlay */}
-      {isLive && (
-        <div className="absolute top-6 left-6 z-20 flex items-center gap-3">
-          <Badge variant="live" className="px-3 py-1 text-xs uppercase tracking-widest font-bold border-none shadow-xl shadow-live/20">
-             Live
-          </Badge>
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-xs font-bold text-white shadow-xl">
-            <Users className="w-3.5 h-3.5 text-text-secondary" />
-            {viewerCount?.toLocaleString()}
-          </div>
-        </div>
-      )}
-
-      {/* Quality Badge */}
-      <div className="absolute top-6 right-6 z-20">
-         <div className="px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[10px] font-black text-white/50 tracking-tighter uppercase">
-            Ultra HD 4K
+      {/* Top Controls */}
+      <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-10 opacity-0 group-hover/player:opacity-100 translate-y-[-10px] group-hover/player:translate-y-0 transition-all duration-500">
+         <div className="flex items-center gap-4">
+            {isLive ? (
+              <Badge variant="live" className="shadow-lg h-7 px-4">LIVE</Badge>
+            ) : (
+              <Badge variant="upcoming" className="h-7 px-4">PREMIERE</Badge>
+            )}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[10px] font-black tracking-widest text-white uppercase">
+               <Users className="w-3 h-3 text-primary" />
+               {viewerCount?.toLocaleString() || '1.2k'}
+            </div>
+         </div>
+         
+         <div className="flex items-center gap-3">
+             <button className="p-2.5 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-white/20 transition-all">
+                <Settings className="w-4 h-4" />
+             </button>
+             <button className="p-2.5 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-white/20 transition-all">
+                <Heart className="w-4 h-4" />
+             </button>
          </div>
       </div>
 
-      {/* Interaction Prompts */}
-      <div className="absolute bottom-24 right-6 z-20 flex flex-col gap-3">
-         <button className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-live transition-all group/heart scale-0 group-hover:scale-100 delay-100 duration-300">
-            <Heart className="w-5 h-5 group-hover/heart:fill-current" />
-         </button>
-         <button className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-primary transition-all scale-0 group-hover:scale-100 delay-200 duration-300">
-            <Users className="w-5 h-5" />
-         </button>
-      </div>
+      {/* Center Play Button */}
+      {!isPlaying && (
+        <button 
+          onClick={() => setIsPlaying(true)}
+          className="absolute inset-0 flex items-center justify-center z-20 group/play"
+        >
+          <div className="w-24 h-24 bg-primary/20 backdrop-blur-xl rounded-full flex items-center justify-center border-2 border-primary/30 transform group-hover/play:scale-110 transition-all duration-500 shadow-[0_0_50px_rgba(124,58,237,0.3)]">
+            <Play className="w-10 h-10 text-white fill-current translate-x-1" />
+          </div>
+        </button>
+      )}
 
-      {/* Controls Overlay */}
-      <div className={cn(
-        "absolute bottom-0 left-0 w-full p-8 pt-20 bg-gradient-to-t from-black via-black/40 to-transparent transition-opacity duration-500 z-20",
-        showControls ? "opacity-100" : "opacity-0"
-      )}>
-        {/* Progress Bar Container */}
-        <div className="w-full h-1.5 bg-white/20 rounded-full mb-6 relative group/progress cursor-pointer">
-           <div className="absolute top-0 left-0 h-full w-1/3 bg-primary rounded-full">
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full scale-0 group-hover/progress:scale-100 transition-transform shadow-lg border-2 border-primary" />
-           </div>
-        </div>
+      {/* Bottom Controls Shell */}
+      <div className="absolute bottom-0 inset-x-0 p-6 flex flex-col gap-4 z-10 opacity-0 group-hover/player:opacity-100 translate-y-[20px] group-hover/player:translate-y-0 transition-all duration-500">
+         {/* Custom Progress Bar (Simulation) */}
+         <div className="relative w-full h-1.5 bg-white/10 rounded-full overflow-hidden group/bar cursor-pointer">
+            <div className="absolute left-0 top-0 h-full w-2/3 bg-primary rounded-full relative">
+               <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full scale-0 group-hover/bar:scale-100 transition-transform shadow-xl" />
+            </div>
+         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <button onClick={() => setIsPlaying(!isPlaying)} className="text-white hover:text-primary transition-colors">
-              {isPlaying ? <Pause className="fill-current" /> : <Play className="fill-current" />}
-            </button>
-            <button className="text-white hover:text-primary transition-colors">
-              <SkipForward />
-            </button>
-            <div className="flex items-center gap-3 group/vol cursor-pointer">
-               <Volume2 className="text-white group-hover/vol:text-primary transition-colors" />
-               <div className="w-20 h-1 bg-white/20 rounded-full overflow-hidden">
-                  <div className="w-3/4 h-full bg-white group-hover/vol:bg-primary transition-colors" />
+         <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+               <button 
+                 onClick={() => setIsPlaying(!isPlaying)}
+                 className="text-white hover:text-primary transition-colors transform active:scale-90"
+               >
+                 {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current" />}
+               </button>
+               
+               <button className="text-white hover:text-primary transition-colors">
+                  <SkipForward className="w-5 h-5 fill-current" />
+               </button>
+
+               <div className="flex items-center gap-3 group/volume">
+                  <button className="text-white">
+                     <Volume2 className="w-5 h-5" />
+                  </button>
+                  <div className="w-24 h-1 bg-white/20 rounded-full overflow-hidden">
+                     <div 
+                       className="h-full bg-white transition-all" 
+                       style={{ width: `${volume}%` }} 
+                     />
+                  </div>
+               </div>
+
+               <div className="text-xs font-bold text-white tracking-widest tabular-nums">
+                  {isLive ? '01:24:50' : '00:00 / 45:00'}
+                  <span className="mx-2 text-white/40">|</span>
+                  <span className="text-primary">1080p60</span>
                </div>
             </div>
-            <span className="text-sm font-medium text-white/70 tabular-nums">00:34 / 2:30:00</span>
-          </div>
 
-          <div className="flex items-center gap-6">
-            <button className="text-white hover:text-primary transition-colors">
-              <Settings className="w-5 h-5" />
-            </button>
-            <button className="text-white hover:text-primary transition-colors">
-              <Maximize className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
+            <div className="flex items-center gap-4">
+               <button className="p-2 text-white/60 hover:text-white transition-colors">
+                  <span className="text-[10px] font-black tracking-widest uppercase border border-white/20 rounded px-1.5 py-0.5">CC</span>
+               </button>
+               <button className="text-white hover:text-primary transition-colors">
+                  <Maximize className="w-5 h-5" />
+               </button>
+            </div>
+         </div>
       </div>
     </div>
   );
 }
+

@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Bell, User, Menu, X, Play } from "lucide-react";
+import { Search, Bell, Menu, X, Play } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 
 export function Header() {
