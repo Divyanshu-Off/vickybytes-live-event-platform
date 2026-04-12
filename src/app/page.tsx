@@ -8,11 +8,27 @@ import { MOCK_EVENTS } from "@/data/mockEvents";
 import { Search, Info, SlidersHorizontal, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function ListingPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [quoteIndex, setQuoteIndex] = useState(0);
+
+  const QUOTES = [
+    { prefix: "Witness the", highlight: "Future", suffix: "of Digital Events." },
+    { prefix: "Experience the", highlight: "Moment", suffix: "in Real-Time." },
+    { prefix: "Join the", highlight: "Revolution", suffix: "of Live Content." },
+    { prefix: "Unlock the", highlight: "Premium", suffix: "Streaming Era." },
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setQuoteIndex((prev) => (prev + 1) % QUOTES.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Simulate initial load for skeletons
   useEffect(() => {
@@ -38,85 +54,81 @@ export default function ListingPage() {
     <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 selection:text-text-primary">
       <Header />
       
-      <main className="flex-1 container mx-auto px-4 md:px-6 py-12 md:py-20 max-w-7xl">
+      <main className="flex-1 container mx-auto px-4 md:px-6 py-10 md:py-12 max-w-7xl">
         {/* Hero Section */}
-        <section className="mb-16 md:mb-24 flex flex-col gap-10">
-          <div className="flex flex-col gap-6 max-w-4xl">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20"
-            >
-              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Live Experience Platform</span>
-            </motion.div>
-            
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="font-display text-5xl md:text-7xl font-black tracking-tight leading-[1.1]"
-            >
-              Witness the <span className="text-gradient">Future</span> of <br className="hidden md:block" /> Digital Events.
-            </motion.h1>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-lg md:text-xl text-text-secondary leading-relaxed max-w-2xl"
-            >
-              The most immersive live-streaming experience for tech enthusiasts, creators, and innovators. 
-              Join thousands already watching.
-            </motion.p>
+        <section className="mb-10 flex flex-col items-start text-left">
+          <div className="flex items-center overflow-hidden min-h-[160px] md:min-h-[220px] py-4">
+            <AnimatePresence mode="wait">
+              <motion.h1 
+                key={quoteIndex}
+                className="font-display text-4xl md:text-7xl font-black tracking-tight leading-[1.1] max-w-6xl flex flex-wrap gap-x-[0.2em] gap-y-1 select-none cursor-default"
+                style={{ perspective: "1000px" }}
+              >
+                {[
+                  ...QUOTES[quoteIndex].prefix.split(" "),
+                  QUOTES[quoteIndex].highlight,
+                  ...QUOTES[quoteIndex].suffix.split(" ")
+                ].map((word, wordIdx, array) => {
+                  // Calculate cumulative character index for highlighting
+                  const isHighlight = word === QUOTES[quoteIndex].highlight;
+                  
+                  return (
+                    <span key={wordIdx} className="inline-flex whitespace-nowrap">
+                      {word.split("").map((char, charIdx) => (
+                        <motion.span
+                          key={charIdx}
+                          initial={{ opacity: 0, rotateX: -90, y: 20 }}
+                          animate={{ opacity: 1, rotateX: 0, y: 0 }}
+                          exit={{ opacity: 0, rotateX: 90, y: -20 }}
+                          transition={{ 
+                            duration: 0.5, 
+                            delay: (wordIdx * 0.1) + (charIdx * 0.02),
+                            ease: [0.22, 1, 0.36, 1]
+                          }}
+                          className={cn(
+                            "inline-block",
+                            isHighlight ? "text-gradient" : ""
+                          )}
+                        >
+                          {char}
+                        </motion.span>
+                      ))}
+                    </span>
+                  );
+                })}
+              </motion.h1>
+            </AnimatePresence>
           </div>
-
-          {/* Search & Utility Bar */}
+          
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-col md:flex-row gap-4 w-full max-w-3xl"
+            transition={{ delay: 0.8 }}
+            className="mt-2 w-full max-w-3xl"
           >
-            <div className="relative flex-1 group">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary group-focus-within:text-primary transition-colors" />
-              <input
-                type="text"
-                placeholder="Search events, hosts, or categories..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-16 bg-surface border border-white/5 rounded-2xl pl-14 pr-6 text-base focus:outline-none focus:ring-2 focus:ring-primary/40 focus:bg-surface-elevated transition-all placeholder:text-text-secondary/50"
-              />
-            </div>
-            <button className="h-16 px-6 bg-surface-elevated border border-white/10 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/5 transition-all active:scale-95 group">
-               <SlidersHorizontal className="w-5 h-5 text-text-secondary group-hover:text-primary transition-colors" />
-               <span className="font-bold text-sm tracking-wide">Filters</span>
-            </button>
+            <FilterBar 
+              activeCategory={activeCategory} 
+              onCategoryChange={setActiveCategory} 
+            />
           </motion.div>
         </section>
 
-        {/* Filters */}
-        <section className="mb-12">
-          <FilterBar 
-            activeCategory={activeCategory} 
-            onCategoryChange={setActiveCategory} 
-          />
-        </section>
-
         {/* Event Grid */}
-        <section className="relative min-h-[400px]">
-          <AnimatePresence mode="popLayout" initial={false}>
+        <section className="relative min-h-[600px]">
+          <AnimatePresence mode="wait">
             {isLoading ? (
               <motion.div 
                 key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-16"
               >
                 {[...Array(8)].map((_, i) => (
-                  <div key={i} className="flex flex-col gap-4">
+                  <div key={i} className="flex flex-col gap-6">
                     <Skeleton className="aspect-video rounded-[2rem]" />
                     <div className="flex gap-4 px-1">
-                       <Skeleton className="w-10 h-10 rounded-2xl flex-shrink-0" />
+                       <Skeleton className="w-12 h-12 rounded-full flex-shrink-0" />
                        <div className="flex-1 space-y-3">
                           <Skeleton className="h-5 w-full rounded-lg" />
                           <Skeleton className="h-4 w-2/3 rounded-lg" />
@@ -135,11 +147,12 @@ export default function ListingPage() {
                   show: {
                     opacity: 1,
                     transition: {
-                      staggerChildren: 0.1
+                      staggerChildren: 0.1,
+                      delayChildren: 0.2
                     }
                   }
                 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-16"
               >
                 {filteredEvents.map((event, index) => (
                   <EventCard 

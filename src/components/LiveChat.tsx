@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Send, MessageSquare, Flame, Info, Calendar, Users } from "lucide-react";
+import { Send, MessageSquare, Flame, Info, Calendar, Users, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -38,7 +38,25 @@ export function LiveChat() {
   const [activeTab, setActiveTab] = useState<TabType>("chat");
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState("");
+  const [isAtBottom, setIsAtBottom] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Detect scroll position
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const isBottom = Math.abs(target.scrollHeight - target.clientHeight - target.scrollTop) < 10;
+    setIsAtBottom(isBottom);
+  };
+
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+      setIsAtBottom(true);
+    }
+  };
 
   // Simulate incoming messages
   useEffect(() => {
@@ -59,15 +77,15 @@ export function LiveChat() {
     return () => clearInterval(interval);
   }, [activeTab]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll logic
   useEffect(() => {
-    if (scrollRef.current && activeTab === "chat") {
+    if (isAtBottom && scrollRef.current && activeTab === "chat") {
       scrollRef.current.scrollTo({
         top: scrollRef.current.scrollHeight,
         behavior: "smooth"
       });
     }
-  }, [messages, activeTab]);
+  }, [messages, activeTab, isAtBottom]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,6 +100,8 @@ export function LiveChat() {
 
     setMessages((prev) => [...prev, newMessage]);
     setInputText("");
+    // Clicking send always snaps you to bottom
+    setTimeout(() => scrollToBottom(), 100);
   };
 
   const TABS = [
@@ -121,10 +141,11 @@ export function LiveChat() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="flex flex-col h-full"
+              className="flex flex-col h-full relative"
             >
               <div 
                 ref={scrollRef}
+                onScroll={handleScroll}
                 className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 no-scrollbar"
               >
                 {messages.map((msg) => (
@@ -154,6 +175,25 @@ export function LiveChat() {
                   </motion.div>
                 ))}
               </div>
+
+              {/* Catch-up Button (YouTube style) */}
+              <AnimatePresence>
+                {!isAtBottom && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, x: "-50%" }}
+                    animate={{ opacity: 1, y: 0, x: "-50%" }}
+                    exit={{ opacity: 0, y: 10, x: "-50%" }}
+                    className="absolute bottom-24 left-1/2 z-20"
+                  >
+                    <button 
+                      onClick={scrollToBottom}
+                      className="w-10 h-10 rounded-full bg-primary text-white shadow-2xl shadow-primary/40 border border-white/10 flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
+                    >
+                      <ChevronDown className="w-5 h-5 animate-bounce" />
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Input Area */}
               <div className="p-4 md:p-6 bg-background/50 border-t border-white/5">

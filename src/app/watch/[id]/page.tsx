@@ -5,13 +5,14 @@ import { Header } from "@/components/layout/Header";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { LiveChat } from "@/components/LiveChat";
 import { EventDetails } from "@/components/EventDetails";
-import { Badge } from "@/components/ui/Badge";
 import { MOCK_EVENTS } from "@/data/mockEvents";
 import { motion } from "framer-motion";
 import { ChevronRight, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { EventCard } from "@/components/EventCard";
 import { notFound } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface WatchPageProps {
   params: Promise<{ id: string }>;
@@ -20,6 +21,7 @@ interface WatchPageProps {
 export default function WatchPage({ params }: WatchPageProps) {
   const { id } = use(params);
   const event = MOCK_EVENTS.find((e) => e.id === id);
+  const [isChatVisible, setIsChatVisible] = React.useState(true);
 
   if (!event) {
     notFound();
@@ -66,42 +68,42 @@ export default function WatchPage({ params }: WatchPageProps) {
         <div className="flex flex-col lg:flex-row min-h-[calc(100vh-140px)]">
           {/* Video & Info Section (Main) */}
           <div className="flex-1 flex flex-col overflow-y-auto no-scrollbar">
-            <div className="relative w-full aspect-video bg-black shadow-2xl">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              className="relative w-full aspect-video bg-black shadow-2xl overflow-hidden"
+            >
               <VideoPlayer 
                 thumbnail={event.thumbnail} 
                 isLive={event.status === 'live'} 
                 viewerCount={event.viewerCount}
               />
-            </div>
+            </motion.div>
             
             <div className="px-4 md:px-12 py-8 md:py-16 max-w-6xl mx-auto w-full">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
               >
                 <EventDetails event={event} />
               </motion.div>
               
               {/* Related Content Rail (Large Screens) */}
               <div className="mt-20 hidden xl:block">
-                 <div className="flex items-center justify-between mb-10">
+                 <motion.div 
+                   initial={{ opacity: 0 }}
+                   whileInView={{ opacity: 1 }}
+                   viewport={{ once: true }}
+                   className="flex items-center justify-between mb-10"
+                 >
                     <h3 className="text-2xl font-black tracking-tight">Similar Streams</h3>
                     <Link href="/" className="text-xs font-bold text-primary uppercase tracking-[0.2em] hover:underline underline-offset-8 transition-all">Explore All</Link>
-                 </div>
-                 <div className="grid grid-cols-2 gap-8">
-                    {recommendations.slice(0, 2).map(rec => (
-                       <Link key={rec.id} href={`/watch/${rec.id}`} className="group space-y-4">
-                          <div className="relative aspect-video rounded-[2rem] overflow-hidden border border-white/5 bg-surface cursor-pointer">
-                             <Image src={rec.thumbnail} alt="" fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-6 flex flex-col justify-end">
-                                <Badge variant={rec.status} className="w-fit mb-3">{rec.status.toUpperCase()}</Badge>
-                             </div>
-                          </div>
-                          <div className="px-2">
-                             <h4 className="font-bold text-lg group-hover:text-primary transition-colors line-clamp-1">{rec.title}</h4>
-                             <p className="text-sm text-text-secondary font-medium">{rec.host.name} • {rec.viewerCount?.toLocaleString()} watching</p>
-                          </div>
-                       </Link>
+                 </motion.div>
+                 <div className="grid grid-cols-2 gap-6">
+                    {recommendations.slice(0, 2).map((rec, idx) => (
+                       <EventCard key={rec.id} event={rec} index={idx} />
                     ))}
                  </div>
               </div>
@@ -109,35 +111,46 @@ export default function WatchPage({ params }: WatchPageProps) {
           </div>
 
           {/* Interaction & Recommendations (Sidebar) */}
-          <div className="w-full lg:w-[400px] xl:w-[450px] border-l border-white/5 bg-surface/30 flex flex-col min-h-[600px] lg:h-full">
-             {/* Chat remains sticky if on large screens, or moves if mobile */}
-             <div className="flex-1 min-h-[400px] lg:min-h-0">
-                <LiveChat />
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="w-full lg:w-[400px] xl:w-[450px] border-l border-white/5 bg-surface/30 flex flex-col lg:h-[calc(100vh-140px)] sticky top-[140px]"
+          >
+             {/* Chat container - Collapsible and independently scrollable */}
+             <div className={cn(
+                "transition-all duration-500 ease-[0.22,1,0.36,1] flex flex-col overflow-hidden border-b border-white/5",
+                isChatVisible ? "flex-[1.5] min-h-[400px]" : "h-14 min-h-[56px]"
+             )}>
+                <div className="flex items-center justify-between px-6 py-4 bg-background/50 border-b border-white/5 flex-shrink-0">
+                   <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-live animate-pulse" />
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">Live Interaction</span>
+                   </div>
+                   <button 
+                    onClick={() => setIsChatVisible(!isChatVisible)}
+                    className="text-[10px] font-bold text-primary hover:text-white transition-colors"
+                   >
+                    {isChatVisible ? "HIDE CHAT" : "SHOW CHAT"}
+                   </button>
+                </div>
+                <div className={cn("flex-1 overflow-hidden", !isChatVisible && "hidden")}>
+                   <LiveChat />
+                </div>
              </div>
              
-             {/* Simple Sidebar Rail for Other viewports */}
-             <div className="p-8 border-t border-white/5 bg-black/20">
+             {/* Recommendations container - Independent scroll rail */}
+             <div className="flex-1 p-6 md:p-8 bg-black/20 overflow-y-auto no-scrollbar scroll-smooth">
                 <div className="flex items-center justify-between mb-8">
-                   <h3 className="text-xs font-black uppercase tracking-[0.2em] text-text-secondary">Related Content</h3>
+                   <h3 className="text-xs font-black uppercase tracking-[0.2em] text-text-secondary">Up Next</h3>
                 </div>
-                <div className="flex flex-col gap-6">
-                   {recommendations.slice(0, 4).map((rec) => (
-                     <Link key={rec.id} href={`/watch/${rec.id}`} className="group flex gap-5 items-start">
-                        <div className="relative aspect-video w-32 rounded-xl overflow-hidden flex-shrink-0 border border-white/5 shadow-xl">
-                           <Image src={rec.thumbnail} alt={rec.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
-                           {rec.status === 'live' && (
-                              <div className="absolute top-1 left-1 w-2 h-2 rounded-full bg-live shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                           )}
-                        </div>
-                        <div className="flex flex-col gap-1 overflow-hidden min-w-0">
-                           <h4 className="text-xs font-bold leading-tight line-clamp-2 text-text-primary group-hover:text-primary transition-colors">{rec.title}</h4>
-                           <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">{rec.host.name}</span>
-                        </div>
-                     </Link>
+                <div className="flex flex-col gap-8">
+                   {recommendations.slice(0, 4).map((rec, idx) => (
+                      <EventCard key={rec.id} event={rec} index={idx} />
                    ))}
                 </div>
              </div>
-          </div>
+          </motion.div>
         </div>
       </main>
     </div>

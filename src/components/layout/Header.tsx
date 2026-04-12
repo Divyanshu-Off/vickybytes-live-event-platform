@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Bell, Menu, X, Play } from "lucide-react";
+import { Search, Bell, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -27,13 +28,13 @@ export function Header() {
     >
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-              <Play className="w-6 h-6 text-white fill-current" />
+          <Link href="/" className="group">
+            <div className="flex items-center gap-3">
+              <BrandLogo size={32} />
+              <span className="font-display text-xl font-bold tracking-tight hidden sm:block leading-none">
+                Vicky<span className="text-primary">Stream</span>
+              </span>
             </div>
-            <span className="font-display text-xl font-bold tracking-tight hidden sm:block">
-              Vicky<span className="text-primary">Stream</span>
-            </span>
           </Link>
 
           <nav className="hidden lg:flex items-center gap-6">

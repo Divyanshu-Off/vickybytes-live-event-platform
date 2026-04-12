@@ -45,4 +45,39 @@
       display: none;
     }
   }
+
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .shimmer::after {
+    @apply content-[''] absolute inset-0 -translate-x-full;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.05),
+      transparent
+    );
+    animation: shimmer-premium 2s infinite;
+  }
+
+  @keyframes shimmer-premium {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes sweep {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .glass-spotlight {
+    background: radial-gradient(
+      600px circle at var(--mouse-x) var(--mouse-y),
+      rgba(124, 58, 237, 0.06),
+      transparent 40%
+    );
+  }
 }
